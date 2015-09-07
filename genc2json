@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+# Any copyright is dedicated to the Public Domain.
+# http://creativecommons.org/publicdomain/zero/1.0/
+#
+# Original code by Fred Wenzel
+# Updates by Gervase Markham <gerv@gerv.net>
+#
+# Pass GENC 3.0 on STDIN; get JSON on STDOUT
+
+import json
+import re
+import sys
+from xml.etree import ElementTree as ET
+
+NS = {
+    'genc': 'http://api.nsgreg.nga.mil/schema/genc/3.0',
+    'genc-cmn': 'http://api.nsgreg.nga.mil/schema/genc/3.0/genc-cmn'
+}
+
+ent = lambda name, ns: '{%s}%s' % (NS[ns], name)
+
+tree = ET.parse(sys.stdin)
+root = tree.getroot()
+
+countries = {}
+
+for entity in root:
+    if entity.tag != ent('GeopoliticalEntityEntry', 'genc'):
+        continue
+
+    code_node = entity.find('.//%s' % ent('char2Code', 'genc-cmn'))
+    name_node = entity.find(ent('shortName', 'genc'))
+
+    if code_node is None or name_node is None:
+        continue
+
+    code = code_node.text.lower()
+    name = name_node.text
+
+    # Omit US gov't entity codes.
+    if re.match(r'a\d', code):
+        continue
+
+    countries[name] = code
+
+print json.dumps(countries, indent=4, sort_keys=True)

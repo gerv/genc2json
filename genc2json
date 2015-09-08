@@ -41,6 +41,6 @@ for entity in root:
     if re.match(r'a\d', code):
         continue
 
-    countries[name] = code
+    countries[code] = name
 
 print json.dumps(countries, indent=4, sort_keys=True)

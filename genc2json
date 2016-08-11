@@ -43,4 +43,4 @@ for entity in root:
 
     countries[code] = name
 
-print json.dumps(countries, indent=4, sort_keys=True)
+print json.dumps(countries, indent=4, sort_keys=True, separators=(',', ': '))
